@@ -1,0 +1,51 @@
+# --- WHAT TO SEARCH FOR ---
+job_titles:
+  - "Software Developer Intern"
+  - "Software Engineer Intern"
+  - "Web Developer Intern"
+  - "Frontend Developer Intern"
+  - "Backend Developer Intern"
+  - "Full Stack Developer Intern"
+  - "Mobile Developer Intern"
+  - "DevOps Intern"
+  - "Data Engineer Intern"
+
+# --- WHERE TO SEARCH ---
+locations:
+  - "Calgary, AB, Canada"
+  - "Toronto, ON, Canada"
+  - "Vancouver, BC, Canada"
+  - "Ottawa, ON, Canada"
+  - "Waterloo, ON, Canada"
+  - "Remote, Canada"
+
+# --- INTERNSHIP TARGETING ---
+graduation_year: 2027
+internship_season: "Summer"    # Options: Summer | Fall | Winter | Any
+
+# --- FILTERING ---
+keywords_required:
+  - "intern"
+  - "internship"
+  - "co-op"
+  - "coop"
+  - "student"
+  - "placement"
+
+keywords_excluded:
+  - "senior"
+  - "lead"
+  - "manager"
+  - "director"
+  - "staff"
+  - "principal"
+  - "PhD"
+  - "10+ years"
+
+# --- RESULT LIMITS ---
+max_results_per_source: 50
+max_age_days: 30
+
+# --- EMAIL ---
+send_email_digest: true
+email_recipient: "pkunjk007@gmail.com"            # Fill in your email address
