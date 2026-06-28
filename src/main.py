@@ -11,6 +11,7 @@ from scrapers.adzuna_scraper import fetch_adzuna_jobs
 from scrapers.jobspy_scraper import fetch_jobspy_jobs
 from scrapers.careers_scraper import fetch_careers_jobs
 from processor import filter_jobs, deduplicate
+from gemini_filter import filter_with_gemini
 from excel_writer import load_existing_ids, write_jobs
 from discord_notifier import notify
 
@@ -57,14 +58,18 @@ def main():
     print(f"[3/3] Careers pages total: {len(careers_jobs)}")
     all_raw.extend(careers_jobs)
 
-    # --- Filter ---
-    print(f"\n[filter] Raw total across all sources: {len(all_raw)}")
+    # --- Keyword + date filter ---
+    print(f"\n[filter] Raw total: {len(all_raw)}")
     filtered = filter_jobs(all_raw, config)
-    print(f"[filter] After filtering: {len(filtered)}")
+    print(f"[filter] After keyword/date filter: {len(filtered)}")
+
+    # --- Gemini filter ---
+    print(f"\n[gemini] Sending {len(filtered)} jobs to Gemini for relevance check...")
+    filtered = filter_with_gemini(filtered)
 
     # --- Dedup ---
     existing_ids = load_existing_ids()
-    print(f"[dedup] Existing jobs in Excel: {len(existing_ids)}")
+    print(f"\n[dedup] Existing jobs in Excel: {len(existing_ids)}")
     new_jobs = deduplicate(filtered, existing_ids)
     print(f"[dedup] New jobs after dedup: {len(new_jobs)}")
 

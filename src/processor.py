@@ -9,7 +9,6 @@ def normalize_url(url: str) -> str:
         return ""
     try:
         parsed = urlparse(url.strip())
-        # Remove common tracking params
         STRIP_PARAMS = {
             "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
             "ref", "referer", "source", "src", "tracking", "trk", "trkInfo",
@@ -24,7 +23,6 @@ def normalize_url(url: str) -> str:
 
 
 def make_id(url: str) -> str:
-    """SHA-256 hash of the normalized URL. Used for deduplication."""
     return hashlib.sha256(normalize_url(url).encode()).hexdigest()
 
 
@@ -35,36 +33,49 @@ def filter_jobs(jobs: list, config: dict) -> list:
     cutoff = datetime.now(timezone.utc) - timedelta(days=max_age)
 
     kept = []
+    dropped_no_date = 0
+    dropped_old = 0
+    dropped_keywords = 0
+
     for job in jobs:
         title = job.get("position", "").lower()
         desc = job.get("description_snippet", "").lower()
         combined = title + " " + desc
 
+        # Must have at least one required keyword
         if required and not any(kw in combined for kw in required):
+            dropped_keywords += 1
             continue
 
+        # Must not have excluded keyword in title
         if any(kw in title for kw in excluded):
+            dropped_keywords += 1
             continue
 
-        date_posted = job.get("date_posted", "")
-        if date_posted:
-            try:
-                posted_dt = datetime.strptime(date_posted, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-                if posted_dt < cutoff:
-                    continue
-            except ValueError:
-                pass
+        # Must have a date_posted — drop if missing
+        date_posted = job.get("date_posted", "").strip()
+        if not date_posted:
+            dropped_no_date += 1
+            continue
+
+        # Must be within max_age_days
+        try:
+            posted_dt = datetime.strptime(date_posted, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            if posted_dt < cutoff:
+                dropped_old += 1
+                continue
+        except ValueError:
+            # Unparseable date — drop it
+            dropped_no_date += 1
+            continue
 
         kept.append(job)
 
+    print(f"[filter] Dropped {dropped_keywords} by keywords, {dropped_no_date} missing date, {dropped_old} too old.")
     return kept
 
 
 def deduplicate(jobs: list, existing_ids: set) -> list:
-    """
-    Deduplicate by normalized URL only.
-    Also deduplicates within the current batch.
-    """
     seen = set(existing_ids)
     unique = []
 

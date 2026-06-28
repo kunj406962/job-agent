@@ -2,36 +2,37 @@ name: Job Search Agent
 
 on:
   schedule:
-    - cron: '0 */12 * * *' # every 12 hours
-  workflow_dispatch: # allows manual triggering of the workflow
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
 
 jobs:
   search:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repositiory
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      
-      - name: Install Dependencies
+          python-version: '3.12'
+
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run Job Agent
-        env: 
+      - name: Run job search agent
+        env:
           ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
           ADZUNA_API_KEY: ${{ secrets.ADZUNA_API_KEY }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python src/main.py
 
       - name: Commit updated jobs.xlsx
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/jobs.xlsx
           git diff --staged --quiet || git commit -m "chore: update jobs.xlsx [skip ci]"
           git push
