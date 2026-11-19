@@ -43,8 +43,8 @@ keywords_excluded:
   - "10+ years"
 
 # --- RESULT LIMITS ---
-max_results_per_source: 50
-max_age_days: 30
+max_results_per_source: 20
+max_age_days: 7
 
 # --- EMAIL ---
 send_email_digest: true
